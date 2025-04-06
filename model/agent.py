@@ -8,6 +8,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.tools import render_text_description
 from langchain_openai import AzureChatOpenAI
+from langchain_openai import ChatOpenAI
+
 
 from model.state import State
 from tools.policy_tool import lookup_policy
@@ -42,11 +44,12 @@ def load_db_schema(filepath: str) -> str:
 
 def create_tools() -> List[Callable]:
     """Create and return all tools required by the assistant."""
-    search_tool = [TavilySearchResults(max_results=2)]
+    # search_tool = [TavilySearchResults(max_results=2)]
     policy_tool = [lookup_policy]
     query_tool = [execute_query]
     # Combine all tools into one list
-    return search_tool + policy_tool + query_tool
+    # return search_tool + policy_tool + query_tool
+    return policy_tool + query_tool
 
 
 def create_prompt_template(rendered_tools: str, model_sql_content: str) -> ChatPromptTemplate:
@@ -88,11 +91,74 @@ def create_prompt_template(rendered_tools: str, model_sql_content: str) -> ChatP
 
 
 # Initialize Azure LLM
-llm = AzureChatOpenAI(
-    azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYMENT_NAME'),
-    api_version=os.environ.get('AZURE_OPENAI_API_VERSION'),
-    name="llm"
+# llm = AzureChatOpenAI(
+#     azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYMENT_NAME'),
+#     api_version=os.environ.get('AZURE_OPENAI_API_VERSION'),
+#     name="llm"
+# )
+
+
+
+
+
+# 模型配置字典
+MODEL_CONFIGS = {
+    "openai": {
+        "base_url": "https://nangeai.top/v1",
+        "api_key": "sk-0OWbyfzUSwajhvqGoNbjIEEWchM15CchgJ5hIaN6qh9I3XRl",
+        "chat_model": "gpt-4o-mini",
+        "embedding_model": "text-embedding-3-small"
+
+    },
+    "oneapi": {
+        "base_url": "http://139.224.72.218:3000/v1",
+        "api_key": "sk-EDjbeeCYkD1OnI9E48018a018d2d4f44958798A261137591",
+        "chat_model": "qwen-max",
+        "embedding_model": "text-embedding-v1"
+    },
+    "qwen": {
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "api_key": "sk-80a72f794bc4488d85798d590e96db43",
+        "chat_model": "qwen-max",
+        "embedding_model": "text-embedding-v1"
+    },
+    "ollama": {
+        "base_url": "http://localhost:11434/v1",
+        "api_key": "ollama",
+        "chat_model": "deepseek-r1:14b",
+        "embedding_model": "nomic-embed-text:latest"
+    },
+    "siliconflow": {
+        "base_url": os.getenv("SILICONFLOW_API_URL", "https://api.siliconflow.cn/v1"),
+        "api_key": os.getenv("SILICONFLOW_API_KEY", ""),
+        "chat_model": os.getenv("SILICONFLOW_API_MODEL", 'Qwen/Qwen2.5-7B-Instruct'),
+        "embedding_model": os.getenv("SILICONFLOW_API_EMBEDDING_MODEL"),
+    },
+    "zhipu": {
+        "base_url": os.getenv("ZHIPU_API_URL", "https://api.siliconflow.cn/v1"),
+        "api_key": os.getenv("ZHIPU_API_KEY", ""),
+        "chat_model": os.getenv("ZHIPU_API_MODEL", 'Qwen/Qwen2.5-7B-Instruct'),
+        "embedding_model": os.getenv("ZHIPU_API_EMBEDDING_MODEL"),
+    }
+}
+
+DEFAULT_LLM_TYPE = "zhipu"
+
+DEFAULT_TEMPERATURE = 0
+
+config = MODEL_CONFIGS[DEFAULT_LLM_TYPE]
+
+# llm = ChatOpenAI(model="gpt-3.5-turbo")
+llm = ChatOpenAI(
+    name="llm",
+    base_url=config["base_url"],
+    api_key=config["api_key"],
+    model=config["chat_model"],
+    temperature=DEFAULT_TEMPERATURE,
+    timeout=30,  # 添加超时配置（秒）
+    max_retries=2  # 添加重试次数
 )
+# llm = ChatOpenAI(temperature=0)
 
 # Load schema model
 model_sql_content = load_db_schema("./db-init/01_model.sql")

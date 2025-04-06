@@ -78,6 +78,7 @@ async def on_message(message: cl.Message):
 
     # TODO : review the way messages are passed
     async for event in graph.astream_events(latest_message_state, config,  version="v1"):
+        print("-----------------------------")
         kind = event["event"]
         if kind == "on_chat_model_stream":
             if event["event"] == "on_chat_model_stream" and event["name"] == "llm":
@@ -93,6 +94,7 @@ async def on_message(message: cl.Message):
             print(f"Done tool: {event['name']}")
             print(f"Tool output was: {event['data'].get('output')}")
             print("--")
+
     await ui_message.update()
 
 

@@ -23,6 +23,23 @@ pip install poetry
 poetry install
 ```
 
+or
+```
+uv venv --python=3.12
+source .venv/bin/activate
+uv pip install -r requirements.txt  -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+
+
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python get-pip.py
+pip install spacy
+python -m spacy download en_core_web_md
+
+pip install --upgrade langchain langchain-openai
+
+```
+
+
 ### LLM models used
 
 This demo uses remote llm with provided examples for open ai azure instance chat gpt and gemini.

@@ -3,7 +3,8 @@ version: "3.8"
 services:
   music_store_db:
       container_name: music_store_db
-      image: postgres:14.1-alpine
+      # image: postgres:14.1-alpine
+      image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/postgres:14-alpine
       restart: always
       environment:
         - POSTGRES_USER=postgres

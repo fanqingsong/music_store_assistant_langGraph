@@ -9,3 +9,4 @@ numpy
 openai~=1.40.0
 python-dotenv
 spacy
+chainlit
